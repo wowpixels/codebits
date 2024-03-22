@@ -1,13 +1,16 @@
 import './App.css';
 import { useState } from 'react';
+
+// lib to create code editor
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 
+// lib to generate unique ids
+import { v4 as uuidv4 } from 'uuid';
+
 // TODO: Save the snippets in the local storage
 // TODO: Load the snippets from the local storage
-// TODO: Add a button to delete the snippet
-// TODO: Add a button to create a new snippet
 // TODO: Add a button to clear the code
 
 interface Snippet {
@@ -40,61 +43,83 @@ function App() {
   return (
     <>
       <div>
-        <h1>Snippet Manager</h1>
-        {snippets.map((snippet) => (
-          <div
-            key={snippet.id}
-            style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
+        <div className="flex items-center justify-between">
+          <h1 className="font-bold text-3xl mb-4">Snippet Manager</h1>
+
+          <button
+            onClick={() => {
+              const newSnippet = {
+                id: uuidv4(),
+                title: `New Snippet`,
+                code: `Add your code here`,
+              };
+              setSnippets([...snippets, newSnippet]);
+              // Set the new snippet's code as the value
+              setValue(newSnippet.code);
+              setSelectedSnippet(newSnippet.id);
+            }}
           >
+            {snippets.length === 0
+              ? 'Create your first Snippet'
+              : 'Create a New Snippet'}
+          </button>
+        </div>
+
+        <div className="flex relative gap-4">
+          <div className="flex flex-col gap-2 w-96 h-screen overflow-auto">
+            {snippets.map((snippet) => (
+              <div
+                key={snippet.id}
+                style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
+              >
+                <button
+                  onClick={() => {
+                    setValue(snippet.code ?? '');
+                    setSelectedSnippet(snippet.id);
+                  }}
+                  style={
+                    selectedSnippet === snippet.id
+                      ? { backgroundColor: 'red' }
+                      : {}
+                  }
+                >
+                  {snippet.title}
+                </button>
+                <button
+                  onClick={() => {
+                    setSnippets(snippets.filter((s) => s.id !== snippet.id));
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+          {snippets.length === 0 ? (
+            <p>No snippets available</p>
+          ) : (
+            <CodeMirror
+              value={value}
+              height="200px"
+              extensions={[javascript({ jsx: true })]}
+              onChange={onChange}
+              theme={dracula}
+              className="w-full"
+            />
+          )}
+          {snippets.length === 0 ? (
+            ''
+          ) : (
             <button
               onClick={() => {
-                setValue(snippet.code ?? '');
-                setSelectedSnippet(snippet.id);
+                navigator.clipboard.writeText(value);
               }}
-              style={
-                selectedSnippet === snippet.id ? { backgroundColor: 'red' } : {}
-              }
+              className="absolute right-0 top-0 bg-blue-500 text-white px-2 py-1 rounded-md"
             >
-              {snippet.title}
+              Copy
             </button>
-
-            {/* // TODO:
-              Create a button to delete the snippet
-            */}
-          </div>
-        ))}
-
-        <CodeMirror
-          value={value}
-          height="200px"
-          extensions={[javascript({ jsx: true })]}
-          onChange={onChange}
-          theme={dracula}
-        />
-
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(value);
-          }}
-        >
-          Copy
-        </button>
-
-        <button
-          onClick={() => {
-            const newSnippet = {
-              id: snippets.length + 1,
-              title: `New Snippet ${snippets.length + 1}`,
-              code: `a New snippet ${snippets.length + 1}`,
-            };
-            setSnippets([...snippets, newSnippet]);
-            // Set the new snippet's code as the value
-            setValue(newSnippet.code);
-            setSelectedSnippet(newSnippet.id);
-          }}
-        >
-          Create a New Snippet
-        </button>
+          )}
+        </div>
       </div>
     </>
   );
