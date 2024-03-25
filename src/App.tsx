@@ -7,9 +7,6 @@ import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 
-// lib to generate unique ids
-import { v4 as uuidv4 } from 'uuid';
-
 // shadcn components
 import { Button } from '@/components/ui/button';
 import CreateButton from './components/CreateButton';

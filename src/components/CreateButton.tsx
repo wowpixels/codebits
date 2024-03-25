@@ -4,9 +4,15 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { v4 as uuidv4 } from 'uuid';
 
+interface Snippet {
+  id: number;
+  title: string;
+  code?: string;
+}
+
 interface CreateButtonProps {
-  snippets: [];
-  setSnippets: React.Dispatch<React.SetStateAction<[]>>;
+  snippets: Snippet[];
+  setSnippets: React.Dispatch<React.SetStateAction<Snippet[]>>;
   setValue: React.Dispatch<React.SetStateAction<string>>;
   setSelectedSnippet: React.Dispatch<React.SetStateAction<number>>;
   setCopy: React.Dispatch<React.SetStateAction<boolean>>;
