@@ -1,5 +1,6 @@
 import './App.css';
 import { useState } from 'react';
+import { FaRegTrashCan } from 'react-icons/fa6';
 
 // lib to create code editor
 import CodeMirror from '@uiw/react-codemirror';
@@ -8,6 +9,10 @@ import { dracula } from '@uiw/codemirror-theme-dracula';
 
 // lib to generate unique ids
 import { v4 as uuidv4 } from 'uuid';
+
+// shadcn components
+import { Button } from '@/components/ui/button';
+import CreateButton from './components/CreateButton';
 
 // TODO: Save the snippets in the local storage
 // TODO: Load the snippets from the local storage
@@ -23,6 +28,7 @@ function App() {
   const [value, setValue] = useState('');
   const [selectedSnippet, setSelectedSnippet] = useState<number>(0);
   const [snippets, setSnippets] = useState<Snippet[]>([]);
+  const [copy, setCopy] = useState(false);
 
   const onChange = (val: string) => {
     // Update the current snippet's code
@@ -38,89 +44,95 @@ function App() {
       })
     );
     setValue(val);
+    setCopy(false);
   };
 
   return (
     <>
-      <div>
-        <div className="flex items-center justify-between">
-          <h1 className="font-bold text-3xl mb-4">Snippet Manager</h1>
+      <div className="h-16 px-4 relative z-10 flex items-center justify-between shadow">
+        <h1 className="text-xl font-bold md:text-2xl">Codebits</h1>
+        <CreateButton
+          snippets={snippets}
+          setSnippets={setSnippets}
+          setValue={setValue}
+          setSelectedSnippet={setSelectedSnippet}
+          setCopy={setCopy}
+        />
+      </div>
 
-          <button
-            onClick={() => {
-              const newSnippet = {
-                id: uuidv4(),
-                title: `New Snippet`,
-                code: `Add your code here`,
-              };
-              setSnippets([...snippets, newSnippet]);
-              // Set the new snippet's code as the value
-              setValue(newSnippet.code);
-              setSelectedSnippet(newSnippet.id);
-            }}
-          >
-            {snippets.length === 0
-              ? 'Create your first Snippet'
-              : 'Create a New Snippet'}
-          </button>
+      {snippets.length === 0 ? (
+        <div className="w-full space-y-2 h-[calc(100vh_-_theme(space.8))] flex flex-col justify-center items-center">
+          <h1 className="font-bold text-slate-800">
+            No snippets available yet...
+          </h1>
+          <CreateButton
+            snippets={snippets}
+            setSnippets={setSnippets}
+            setValue={setValue}
+            setSelectedSnippet={setSelectedSnippet}
+          />
         </div>
-
-        <div className="flex relative gap-4">
-          <div className="flex flex-col gap-2 w-96 h-screen overflow-auto">
+      ) : (
+        <div className="flex relative">
+          <div className="h-[calc(100vh_-_theme(space.8))] overflow-auto border-r border-slate-200 flex flex-col w-96">
             {snippets.map((snippet) => (
               <div
                 key={snippet.id}
-                style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
+                className="flex items-center group border-b border-slate-100 hover:bg-slate-200"
               >
                 <button
+                  className={`w-full h-full flex flex-col px-4 py-3 text-left ${
+                    selectedSnippet === snippet.id ? 'bg-slate-200' : ''
+                  }`}
                   onClick={() => {
                     setValue(snippet.code ?? '');
                     setSelectedSnippet(snippet.id);
+                    setCopy(false);
                   }}
-                  style={
-                    selectedSnippet === snippet.id
-                      ? { backgroundColor: 'red' }
-                      : {}
-                  }
                 >
                   {snippet.title}
-                </button>
-                <button
-                  onClick={() => {
-                    setSnippets(snippets.filter((s) => s.id !== snippet.id));
-                  }}
-                >
-                  Delete
+                  <span className="line-clamp-1 text-slate-400">
+                    {snippet.code}
+                  </span>
                 </button>
               </div>
             ))}
           </div>
-          {snippets.length === 0 ? (
-            <p>No snippets available</p>
-          ) : (
-            <CodeMirror
-              value={value}
-              height="200px"
-              extensions={[javascript({ jsx: true })]}
-              onChange={onChange}
-              theme={dracula}
-              className="w-full"
-            />
-          )}
-          {snippets.length === 0 ? (
-            ''
-          ) : (
-            <button
+          <CodeMirror
+            value={value}
+            height="200px"
+            extensions={[javascript({ jsx: true })]}
+            onChange={onChange}
+            theme={dracula}
+            className="w-full"
+          />
+          <div className="absolute right-4 top-4 px-2 py-1 flex gap-2 justify-end">
+            <Button
               onClick={() => {
                 navigator.clipboard.writeText(value);
+                setCopy(true);
               }}
-              className="absolute right-0 top-0 bg-blue-500 text-white px-2 py-1 rounded-md"
+              variant={'outline'}
+              className="rounded-md"
             >
-              Copy
-            </button>
-          )}
+              {copy ? 'Copied!' : 'Copy'}
+            </Button>
+
+            <Button
+              className="rounded-md aspect-square"
+              variant={'destructive'}
+              onClick={() => {
+                setSnippets(
+                  snippets.filter((snippet) => snippet.id !== selectedSnippet)
+                );
+                setCopy(false);
+              }}
+            >
+              <FaRegTrashCan width={32} height={32} />
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
