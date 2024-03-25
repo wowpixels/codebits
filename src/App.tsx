@@ -67,6 +67,7 @@ function App() {
             setSnippets={setSnippets}
             setValue={setValue}
             setSelectedSnippet={setSelectedSnippet}
+            setCopy={setCopy}
           />
         </div>
       ) : (
