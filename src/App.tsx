@@ -16,14 +16,14 @@ import CreateButton from './components/CreateButton';
 // TODO: Add a button to clear the code
 
 interface Snippet {
-  id: number;
+  id: string;
   title: string;
   code?: string;
 }
 
 function App() {
   const [value, setValue] = useState('');
-  const [selectedSnippet, setSelectedSnippet] = useState<number>(0);
+  const [selectedSnippet, setSelectedSnippet] = useState<string>('0');
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [copy, setCopy] = useState(false);
 
